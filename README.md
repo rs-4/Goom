@@ -1,7 +1,7 @@
 Goom = zoom 
 
-- [ ]  recuper le flux video des different app 
-- [ ]   recuper la camera , le micro 
+- [ ]   récupérer  le flux video des differents app /ecran 
+- [ ]   récupérer la camera , le micro 
 - [ ]   connecter deux user via socket
 - [ ]   login / register 
 
