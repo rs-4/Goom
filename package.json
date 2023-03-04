@@ -7,13 +7,23 @@
   "homepage": "./",
   "private": true,
   "dependencies": {
+    "@electron/remote": "^2.0.9",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "electron-is-dev": "^2.0.0",
+    "path-browserify": "^1.0.1",
+    "peerjs": "^1.4.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router": "^6.8.1",
+    "react-router-dom": "^6.8.1",
+    "react-screen-capture": "^1.0.1",
     "react-scripts": "5.0.1",
+    "react-webrtc": "^1.0.0",
+    "socket.io": "^4.6.1",
+    "socket.io-client": "^4.6.1",
+    "styled-components": "^5.3.6",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -22,6 +32,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron:start": "concurrently -k \"cross-env BROWSER=none yarn start\" \"wait-on http://localhost:3000 && electronmon .\"",
+    "electron:startSecond": "PORT=3002 concurrently -k \"cross-env BROWSER=none yarn start\" \"wait-on http://localhost:3002 && electronmon .\"",
     "electron:package:mac": "yarn build && electron-builder -m -c.extraMetadata.main=build/electron.js",
     "electron:package:win": "yarn build && electron-builder -w -c.extraMetadata.main=build/electron.js",
     "electron:package:linux": "yarn build && electron-builder -l -c.extraMetadata.main=build/electron.js"

@@ -1,7 +1,19 @@
-// Module to control the application lifecycle and the native browser window.
-const { app, BrowserWindow, protocol, ipcMain,dialog } = require("electron");
+const { app, BrowserWindow, protocol, ipcMain, dialog } = require("electron");
 const path = require("path");
 const url = require("url");
+
+const { desktopCapturer } = require("electron");
+
+desktopCapturer
+  .getSources({ types: ["window", "screen"] })
+  .then(async (sources) => {
+    for (const source of sources) {
+      if (source.name === "Electron") {
+        mainWindow.webContents.send("SET_SOURCE", source.id);
+        return;
+      }
+    }
+  });
 
 // Create the native browser window.
 function createWindow() {
@@ -9,28 +21,71 @@ function createWindow() {
     width: 800,
     height: 600,
     // Set the path of an additional "preload" script that can be used to
-    // communicate between node-land and browser-land.
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: true,
+      enableRemoteModule: true,
+      contextIsolation: false,
     },
   });
 
-    ipcMain.on('open-file-dialog', event => {
-      dialog
-        .showOpenDialog(mainWindow, {
-          properties: ['openFile'],
-          filters: [
-            { name: 'Sound', extensions: ['mp3'] }]
-        })
-        .then(result => { // se lance quand on a selectionner le fichier
-          event.reply('selected-file', result.filePaths[0]) // envoie le chemin du fichier selectionner
-        })
-        .catch(err => {
-          console.log(err)
-          dialog.showErrorBox('Error', 'Something went wrong')
-        })
-    })
+  // Add system menu to move the window with drag
+  mainWindow.on("ready-to-show", () => {
+    mainWindow.webContents.on("before-input-event", (event, input) => {
+      if (input.type === "keyDown" && input.key === "Escape") {
+        mainWindow.blur();
+      }
+    });
+
+    mainWindow.setMenu(null);
+
+    mainWindow.webContents.executeJavaScript(`
+      const { remote } = require('electron');
+      const currentWindow = remote.getCurrentWindow();
+
+      let isDragging = false;
+      let mousePosition;
+
+      const dragWindow = (e) => {
+        if (isDragging) {
+          let { x, y } = currentWindow.getPosition();
+          currentWindow.setPosition(x + e.clientX - mousePosition.x, y + e.clientY - mousePosition.y);
+        }
+      }
+
+      const stopDragging = (e) => {
+        isDragging = false;
+      }
+
+      const startDragging = (e) => {
+        isDragging = true;
+        mousePosition = {
+          x: e.clientX,
+          y: e.clientY
+        }
+      }
+
+      document.getElementById('title-bar').addEventListener('mousedown', startDragging);
+      document.getElementById('title-bar').addEventListener('mousemove', dragWindow);
+      document.getElementById('title-bar').addEventListener('mouseup', stopDragging);
+    `);
+  });
+
+  ipcMain.on("open-file-dialog", (event) => {
+    dialog
+      .showOpenDialog(mainWindow, {
+        properties: ["openFile"],
+        filters: [{ name: "Sound", extensions: ["mp3"] }],
+      })
+      .then((result) => {
+        // se lance quand on a selectionner le fichier
+        event.reply("selected-file", result.filePaths[0]); // envoie le chemin du fichier selectionner
+      })
+      .catch((err) => {
+        console.log(err);
+        dialog.showErrorBox("Error", "Something went wrong");
+      });
+  });
 
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
@@ -50,28 +105,20 @@ function createWindow() {
   }
 }
 
-/* Here is the explanation for the code above:
-1. First, the protocol is registered using the registerFileProtocol method.
-2. The callback function is invoked with a URL that is provided as a parameter.
-3. The URL is then used to load the file that is available on the local machine. */
-// Register a custom protocol for loading local files.
-const localFileProtocol =  () => {
-  const protocolName = 'safe-file'
+const localFileProtocol = () => {
+  const protocolName = "safe-file";
   // https://www.electronjs.org/fr/docs/latest/api/protocol#protocolregisterfileprotocolscheme-handler
   protocol.registerFileProtocol(protocolName, (request, callback) => {
-    const url = request.url.replace(`${protocolName}://`, '')
+    const url = request.url.replace(`${protocolName}://`, "");
     try {
-      return callback(decodeURIComponent(url))
-    }
-    catch (error) {
+      return callback(decodeURIComponent(url));
+    } catch (error) {
       // Handle the error as needed
-      console.error(error)
+      console.error(error);
     }
-  })
-}
+  });
+};
 
-// Setup a local proxy to adjust the paths of requested files when loading
-// them from the local production bundle (e.g.: local fonts, etc...).
 function setupLocalFilesNormalizerProxy() {
   protocol.registerHttpProtocol(
     "file",
@@ -85,9 +132,6 @@ function setupLocalFilesNormalizerProxy() {
   );
 }
 
-// This method will be called when Electron has finished its initialization and
-// is ready to create the browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   createWindow();
   setupLocalFilesNormalizerProxy();
@@ -102,18 +146,12 @@ app.whenReady().then(() => {
   });
 });
 
-// Quit when all windows are closed, except on macOS.
-// There, it's common for applications and their menu bar to stay active until
-// the user quits  explicitly with Cmd + Q.
 app.on("window-all-closed", function () {
   if (process.platform !== "darwin") {
     app.quit();
   }
 });
 
-// If your app has no need to navigate or only needs to navigate to known pages,
-// it is a good idea to limit navigation outright to that known scope,
-// disallowing any other kinds of navigation.
 const allowedNavigationDestinations = "https://my-electron-app.com";
 app.on("web-contents-created", (event, contents) => {
   contents.on("will-navigate", (event, navigationUrl) => {
@@ -124,6 +162,3 @@ app.on("web-contents-created", (event, contents) => {
     }
   });
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
