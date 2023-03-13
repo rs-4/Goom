@@ -6,7 +6,6 @@ const { ipcRenderer } = window.require("electron");
 function App() {
   const [peerId, setPeerId] = useState("");
   const [remotePeerIdValue, setRemotePeerIdValue] = useState("");
-  const [chatMessages, setChatMessages] = useState([]);
   const remoteVideoRef = useRef(null);
   const currentUserVideoRef = useRef(null);
   const currentDesktopVideoRef = useRef(null);
@@ -39,10 +38,7 @@ function App() {
 
     chatConnection.current = peer.connect(remotePeerIdValue);
     chatConnection.current.on("open", () => {
-      console.log("Chat connection established!");
-      chatConnection.current.on("data", (data) => {
-        setChatMessages([...chatMessages, data]);
-      });
+      console.log("Chat connection !");
     });
 
     peerInstance.current = peer;
@@ -101,10 +97,6 @@ function App() {
     );
   };
 
-  const sendMessage = (message) => {
-    chatConnection.current.send(message);
-  };
-
   return (
     <div>
       <div>
@@ -127,23 +119,6 @@ function App() {
         <video ref={remoteVideoRef} autoPlay />
         <video ref={currentUserVideoRef} autoPlay muted />
         <video ref={currentDesktopVideoRef} autoPlay />
-      </div>
-      <div>
-        <ul>
-          {chatMessages.map((message, index) => (
-            <li key={index}>{message}</li>
-          ))}
-        </ul>
-        <input
-          type="text"
-          placeholder="Type your message here"
-          onKeyPress={(e) => {
-            if (e.key === "Enter") {
-              sendMessage(e.target.value);
-              e.target.value = "";
-            }
-          }}
-        />
       </div>
     </div>
   );

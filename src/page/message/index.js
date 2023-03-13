@@ -6,12 +6,8 @@ import { saveAs } from "file-saver";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
 const App = styled.div`
-  display: flex;
-  align-items: center;
-  flex-direction: column;
   background-color: #181823;
-  width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
 `;
 
 const ButtonLog = styled.button`
@@ -36,7 +32,6 @@ const Container = styled.div`
   align-items: center;
   margin: 0 auto;
   max-width: 600px;
-  height: 100vh;
   font-family: sans-serif;
 `;
 
@@ -95,8 +90,9 @@ const Message = styled.li`
   border-radius: 5px;
   margin-bottom: 10px;
   display: flex;
-  justify-content: space-between;
-
+  justify-content: space-around;
+  align-items: left;
+  max-width: 300px;
   text-align: ${({ isSent }) => (isSent ? "right" : "left")};
   background-color: ${({ isSent }) => (isSent ? "#0077ff" : "#e0e0e0")};
   color: ${({ isSent }) => (isSent ? "#fff" : "#000")};
@@ -106,6 +102,7 @@ const InputMessageContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  max-width: 350;
 `;
 
 const InputMessage = styled.input`
@@ -115,13 +112,19 @@ const InputMessage = styled.input`
   border: none;
   margin-right: 10px;
   flex: 1;
+  max-width: 350;
+`;
+
+const Messagetext = styled.div`
+  word-break: break-word;
 `;
 
 const Lefttexte = styled.div``;
 
 const Righttexte = styled.div``;
 
-const Index = () => {
+const Index = (peerIdentif) => {
+  //MESSAGE LOGIQUE
   const [peerId, setPeerId] = useState("");
   const [remotePeerId, setRemotePeerId] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
@@ -210,15 +213,6 @@ const Index = () => {
 
   console.log(JSON.stringify(chatMessages, null, 2));
 
-  function sauvegarderTableau() {
-    const fileContent = chatMessages
-      .map((obj) => JSON.stringify(obj))
-      .join("\n");
-    const blob = new Blob([fileContent], { type: "text/plain;charset=utf-8" });
-
-    saveAs(blob, `Log Chat GOOM ${new Date()}.txt`);
-  }
-
   return (
     <App>
       <Container>
@@ -245,15 +239,15 @@ const Index = () => {
             {chatMessages.map((message, index) => (
               <Message key={index} isSent={message.isSentByMe}>
                 <Lefttexte>
-                  {message.isSentByMe ? "Vous" : "Autre personne"}{" "}
+                  {message.isSentByMe ? "Vous" : "Autre personne"}
                 </Lefttexte>
-                {" - "}
+
+                <Messagetext>{message.text}</Messagetext>
                 <Righttexte>
                   {message.timestamp.toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
-                  : {message.text}
                 </Righttexte>
               </Message>
             ))}
@@ -273,9 +267,7 @@ const Index = () => {
         </ChatContainer>
       </Container>
       <div>
-        <ButtonLog onClick={sauvegarderTableau}>
-          Sauvegarder le tableau
-        </ButtonLog>
+        <ButtonLog>Sauvegarder le tableau</ButtonLog>
       </div>
     </App>
   );

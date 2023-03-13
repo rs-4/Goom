@@ -34,15 +34,13 @@ const Label = styled.label`
 `;
 
 const Input = styled.input`
-  width: 100%;
+  width: 270px;
+  height: 30px;
   padding: 8px 12px;
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 22px;
   color: black;
-  border: 1px solid #b8b8b5;
-  border-radius: 4px;
-  transition: border-color 0.5s;
+  font-family: "Poppins Ligth";
+  border: 1px solid #537fe7;
+  border-radius: 10px;
 `;
 
 export default Index;

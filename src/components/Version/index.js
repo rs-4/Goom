@@ -11,15 +11,18 @@ const Index = ({ version = "" }) => {
 
 const Container = styled.div`
   background: rgba(108, 105, 105, 0.1);
+
   border-radius: 10px;
+  position: absolute;
+  bottom: 0;
 `;
 
 const Version = styled.h1`
   font-family: "JetBrains Mono";
   font-style: normal;
-  font-weight: 400;
-  font-size: 38px;
-  line-height: 50px;
+  font-weight: 100;
+  font-size: 20px;
+  line-height: 20px;
 
   color: #737373;
 `;
