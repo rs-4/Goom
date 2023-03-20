@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { useState, useRef, useEffect } from "react";
 import Peer from "peerjs";
 import { saveAs } from "file-saver";
+
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
 const App = styled.div`
@@ -216,7 +217,12 @@ const Index = () => {
     }
   };
 
-  console.log(JSON.stringify(chatMessages, null, 2));
+  const savTab = () => {
+    console.log("save");
+    let data = chatMessages.stringify(chatMessages, null, 2);
+    let blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+    saveAs(blob, "export.txt");
+  };
 
   return (
     <App>
@@ -245,8 +251,8 @@ const Index = () => {
               <Message key={index} isSent={message.isSentByMe}>
                 <Lefttexte>
                   {message.isSentByMe
-                    ? ` ${localStorage.getItem("username}")} : `
-                    : "Autre personne"}
+                    ? `${localStorage.getItem("username")} : `
+                    : "Autre personne :"}
                 </Lefttexte>
 
                 <Messagetext>{message.text}</Messagetext>
@@ -274,7 +280,7 @@ const Index = () => {
         </ChatContainer>
       </Container>
       <div>
-        <ButtonLog>Sauvegarder le tableau</ButtonLog>
+        <ButtonLog onClick={() => savTab}>Sauvegarder le tableau</ButtonLog>
       </div>
     </App>
   );
