@@ -123,8 +123,7 @@ const Lefttexte = styled.div``;
 
 const Righttexte = styled.div``;
 
-const Index = (peerIdentif) => {
-  //MESSAGE LOGIQUE
+const Index = () => {
   const [peerId, setPeerId] = useState("");
   const [remotePeerId, setRemotePeerId] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
@@ -134,6 +133,7 @@ const Index = (peerIdentif) => {
 
   const peer = useRef(null);
   const chatConnection = useRef(null);
+  const videoConnection = useRef(null); // Ajouter une référence pour la connexion vidéo
 
   useEffect(() => {
     peer.current = new Peer();
@@ -194,6 +194,11 @@ const Index = (peerIdentif) => {
         setConnected(false);
         chatConnection.current = null;
       });
+
+      // Créer une connexion vidéo et définir la référence correspondante
+      videoConnection.current = peer.current.call(remotePeerId, null, {
+        metadata: { type: "video" },
+      });
     });
 
     console.log("Connexion établie");
@@ -239,7 +244,9 @@ const Index = (peerIdentif) => {
             {chatMessages.map((message, index) => (
               <Message key={index} isSent={message.isSentByMe}>
                 <Lefttexte>
-                  {message.isSentByMe ? "Vous" : "Autre personne"}
+                  {message.isSentByMe
+                    ? ` ${localStorage.getItem("username}")} : `
+                    : "Autre personne"}
                 </Lefttexte>
 
                 <Messagetext>{message.text}</Messagetext>

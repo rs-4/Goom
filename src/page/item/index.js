@@ -7,12 +7,38 @@ import Home from "../home";
 // afficher la page home
 const App = styled.div`
   background-color: #181823;
+  color: white;
+  width: 100vw;
+  height: 100vh;
 `;
 
 const Button = styled.button`
-  background-color: blue;
+  padding: 10px 10px 10px 10px;
+  margin: 10px;
+  font-size: 16px;
+  background-color: #0077ff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+`;
+
+const Pseudo = styled.div`
+  display: flex
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 2rem;
+  font-family: "Poppins Ligth";
+  font-weight: 400px;
+  line-height: 52px;
   color: white;
-  padding: 10px;
+`;
+
+const Video = styled.video`
+  width: 400px;
+  height: 300px;
+  object-fit: cover;
 `;
 
 const Sidebar = styled.div`
@@ -261,29 +287,31 @@ const MessageComponent = () => {
       {/* AFFICHER L'APP APPELE ETC  */}
       <div>
         <div>
-          <div>Mon ID d'appelle : {peerId}</div>
-          <input
+          <Pseudo>@{localStorage.getItem("username")}</Pseudo>
+          <div>Mon ID d'appel : {peerId}</div>
+          <Input
             type="text"
             placeholder="Remote Peer ID"
             value={remotePeerIdValue}
             onChange={(e) => setRemotePeerIdValue(e.target.value)}
           />
-          <button onClick={() => startCall(remotePeerIdValue, false)}>
-            appele
-          </button>
-          <button onClick={shareScreen}>partage d'ecran </button>
+          <Button onClick={() => startCall(remotePeerIdValue, false)}>
+            appel video
+          </Button>
+
+          <Button onClick={shareScreen}>partage d'ecran </Button>
         </div>
         <div>
           <video ref={remoteVideoRef} autoPlay />
           <video ref={currentUserVideoRef} autoPlay muted />
-          <video ref={currentDesktopVideoRef} autoPlay />
+          <Video ref={currentDesktopVideoRef} autoPlay />
         </div>
       </div>
-      <Button onClick={toggleSidebar}>Open Sidebar</Button>
       <Sidebar open={isOpen}>
         {/* AFFICHER LA BOX MESSAGE  */}
         <Message id={peerId}></Message>
       </Sidebar>
+      <Button onClick={toggleSidebar}>Open Mesage</Button>
     </App>
   );
 };

@@ -1,127 +1,108 @@
-import { useEffect, useRef, useState } from "react";
-import Peer from "peerjs";
+import React from "react";
+import styled from "styled-components";
+import { Link } from "react-router-dom";
+import Version from "../../components/Version";
 
-const { ipcRenderer } = window.require("electron");
+const Index = () => {
+  const [inputValue, setInputValue] = React.useState("");
+  const [error, setError] = React.useState("");
 
-function App() {
-  const [peerId, setPeerId] = useState("");
-  const [remotePeerIdValue, setRemotePeerIdValue] = useState("");
-  const remoteVideoRef = useRef(null);
-  const currentUserVideoRef = useRef(null);
-  const currentDesktopVideoRef = useRef(null);
-  const peerInstance = useRef(null);
-  const chatConnection = useRef(null);
-
-  useEffect(() => {
-    const peer = new Peer();
-
-    peer.on("open", (id) => {
-      setPeerId(id);
-    });
-
-    peer.on("call", (call) => {
-      var getUserMedia =
-        navigator.getUserMedia ||
-        navigator.webkitGetUserMedia ||
-        navigator.mozGetUserMedia;
-
-      getUserMedia({ video: true, audio: true }, (mediaStream) => {
-        currentUserVideoRef.current.srcObject = mediaStream;
-        currentUserVideoRef.current.play();
-        call.answer(mediaStream);
-        call.on("stream", function (remoteStream) {
-          remoteVideoRef.current.srcObject = remoteStream;
-          remoteVideoRef.current.play();
-        });
-      });
-    });
-
-    chatConnection.current = peer.connect(remotePeerIdValue);
-    chatConnection.current.on("open", () => {
-      console.log("Chat connection !");
-    });
-
-    peerInstance.current = peer;
-  }, []);
-
-  const startCall = (remotePeerId, isScreenShare) => {
-    var getUserMedia =
-      navigator.getUserMedia ||
-      navigator.webkitGetUserMedia ||
-      navigator.mozGetUserMedia;
-
-    const constraints = isScreenShare
-      ? { video: { cursor: "always" }, audio: true }
-      : { video: true, audio: true };
-
-    getUserMedia(constraints, (mediaStream) => {
-      currentUserVideoRef.current.srcObject = mediaStream;
-      currentUserVideoRef.current.play();
-      const call = peerInstance.current.call(remotePeerId, mediaStream);
-
-      call.on("stream", (remoteStream) => {
-        remoteVideoRef.current.srcObject = remoteStream;
-        remoteVideoRef.current.play();
-      });
-    });
+  const handleInputChange = (event) => {
+    setInputValue(event.target.value);
+    setError("");
   };
 
-  const shareScreen = () => {
-    const getUserMedia =
-      navigator.getUserMedia ||
-      navigator.webkitGetUserMedia ||
-      navigator.mozGetUserMedia;
-
-    getUserMedia(
-      {
-        video: {
-          mandatory: {
-            chromeMediaSource: "desktop",
-            minWidth: 1280,
-            maxWidth: 1280,
-            minHeight: 720,
-            maxHeight: 720,
-          },
-        },
-        audio: false,
-      },
-      (mediaStream) => {
-        currentDesktopVideoRef.current.srcObject = mediaStream;
-        currentDesktopVideoRef.current.play();
-        const videoTrack = mediaStream.getVideoTracks()[0];
-
-        currentUserVideoRef.current.srcObject = mediaStream;
-        currentUserVideoRef.current.play();
-        peerInstance.current.call(remotePeerIdValue, videoTrack);
-      }
-    );
+  const verify = () => {
+    localStorage.setItem("username", inputValue);
   };
 
   return (
     <div>
-      <div>
-        <div>Mon ID d'appelle : {peerId}</div>
-        <input
+      <App>
+        <Tittle>GOOM</Tittle>
+        <Input
           type="text"
-          placeholder="Remote Peer ID"
-          value={remotePeerIdValue}
-          onChange={(e) => setRemotePeerIdValue(e.target.value)}
+          value={inputValue}
+          onChange={handleInputChange}
+          placeholder="Veuillez saisir votre nom d'utilisateur"
         />
-        <button onClick={() => startCall(remotePeerIdValue, false)}>
-          appele
-        </button>
-        <button onClick={() => startCall(remotePeerIdValue, true)}>
-          partage d'ecran
-        </button>
-        <button onClick={shareScreen}>partage d'ecran </button>
-      </div>
-      <div>
-        <video ref={remoteVideoRef} autoPlay />
-        <video ref={currentUserVideoRef} autoPlay muted />
-        <video ref={currentDesktopVideoRef} autoPlay />
-      </div>
+        <Link to="item" style={{ textDecoration: "none" }}>
+          <Button
+            type="submit"
+            disabled={inputValue.trim().length < 3}
+            onClick={verify}
+          >
+            Démarrer la réunion
+          </Button>
+        </Link>
+        {error && <ErrorMessage>{error}</ErrorMessage>}
+        <Version version="1.0.0" />
+      </App>
     </div>
   );
-}
+};
 
-export default App;
+const App = styled.div`
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  background-color: #181823;
+  width: 100vw;
+  height: 100vh;
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 50px;
+`;
+
+const Input = styled.input`
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid grey;
+  font-size: 16px;
+  width: 300px;
+`;
+
+const Button = styled.button`
+  cursor: pointer;
+  border-radius: 30px;
+  width: 300px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  font-family: "Poppins Ligth";
+  font-weight: 400px;
+  line-height: 52px;
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: ${(props) => (props.disabled ? "grey" : "#537fe7")};
+  color: white;
+  font-size: 16px;
+  border: none;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
+  transition: opacity 0.3s ease;
+  &:hover {
+    opacity: ${(props) => (props.disabled ? 0.5 : 0.8)};
+  }
+`;
+
+const Tittle = styled.h1`
+  font-family: "Josefin Sans";
+  font-weight: 600;
+  font-size: 100px;
+  line-height: 100px;
+  color: #537fe7;
+`;
+
+const ErrorMessage = styled.p`
+  color: red;
+  margin-top: 10px;
+`;
+
+export default Index;

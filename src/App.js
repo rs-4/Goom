@@ -8,15 +8,8 @@ import {
   Routes,
   BrowserRouter,
 } from "react-router-dom";
-import Login from "./page/login";
-import Register from "./page/register";
-import MainPage from "./page/home";
-import Call from "./page/call";
 import Home from "./page/home";
-import Client from "./page/client";
 import Item from "./page/item";
-import Try from "./page/loginSTYLE";
-import Message from "./page/message";
 import { createGlobalStyle } from "styled-components";
 import PoppinsLigth from "./assets/Poppins-Light.ttf";
 import JetBrainMono from "./assets/JetBrainsMono-VariableFont_wght.ttf";
@@ -52,11 +45,8 @@ function App() {
       <FontStyles></FontStyles>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Item />}></Route>
-          <Route path="/register" element={<Call />} />
-          <Route path="/message" element={<Message />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/home" element={<Home />} />
+          <Route path="/" element={<Home />}></Route>
+          <Route path="/item" element={<Item />} />
         </Routes>
       </BrowserRouter>
     </div>
